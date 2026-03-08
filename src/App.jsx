@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import AuraOrb from './components/AuraOrb';
 import Header from './components/Header';
@@ -7,7 +7,6 @@ import InputBar from './components/InputBar';
 import { useChat } from './hooks/useChat';
 
 export default function App() {
-  const [showElevenAgent, setShowElevenAgent] = useState(false);
   const {
     messages,
     isLoading,
@@ -17,7 +16,23 @@ export default function App() {
     toggleMirrorMode,
   } = useChat();
 
-  const elevenAgentUrl = "https://elevenlabs.io/app/talk-to?agent_id=agent_3701kk6934tteymbhm179atarc6f&branch_id=agtbrch_1801kk6935fyf3xspkp0pr8skxbx";
+  // Intégration du Widget ElevenLabs
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://elevenlabs.io/convai-widget/index.js";
+    script.async = true;
+    script.type = "text/javascript";
+    document.body.appendChild(script);
+
+    const widget = document.createElement('elevenlabs-convai');
+    widget.setAttribute('agent-id', 'agent_3701kk6934tteymbhm179atarc6f');
+    document.body.appendChild(widget);
+
+    return () => {
+      if (document.body.contains(script)) document.body.removeChild(script);
+      if (document.body.contains(widget)) document.body.removeChild(widget);
+    };
+  }, []);
 
   return (
     <div style={{
@@ -29,52 +44,6 @@ export default function App() {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* SECTION AGENT ELEVENLABS (PLEIN ÉCRAN SI ACTIF) */}
-      {showElevenAgent && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1000,
-          background: '#0a0a0a',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {/* Bouton pour revenir à l'interface Aura */}
-          <button
-            onClick={() => setShowElevenAgent(false)}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              zIndex: 1001,
-              background: 'rgba(255,255,255,0.1)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              backdropFilter: 'blur(10px)',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '14px',
-              transition: 'all 0.3s'
-            }}
-          >
-            ← Retour à Aura
-          </button>
-
-          <iframe
-            src={elevenAgentUrl}
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              background: 'transparent'
-            }}
-            allow="microphone"
-          />
-        </div>
-      )}
-
       {/* SECTION GAUCHE : INTERFACE CHAT ET SPIRITUALITÉ */}
       <div style={{
         flex: '1.3',
@@ -89,7 +58,6 @@ export default function App() {
         <Header
           intimacyLevel={intimacyLevel}
           isMirrorMode={isMirrorMode}
-          onAgentToggle={() => setShowElevenAgent(true)}
         />
 
         {/* Orbe Flottant */}
@@ -157,7 +125,7 @@ export default function App() {
             }}
           />
 
-          {/* Superposition de gradients pour une intégration parfaite */}
+          {/* Superposition de gradients */}
           <div style={{
             position: 'absolute',
             inset: 0,
