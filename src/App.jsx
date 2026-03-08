@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import AuraOrb from './components/AuraOrb';
 import Header from './components/Header';
 import ChatInterface from './components/ChatInterface';
 import InputBar from './components/InputBar';
+import LandingPage from './components/LandingPage';
 import { useChat } from './hooks/useChat';
 
-export default function App() {
+// Composant Principal de l'Application Aura
+function AuraApp() {
   const {
     messages,
     isLoading,
@@ -27,8 +30,6 @@ export default function App() {
     const widget = document.createElement('elevenlabs-convai');
     widget.setAttribute('agent-id', 'agent_3701kk6934tteymbhm179atarc6f');
 
-    // Ajout de styles personnalisés via une balise style injectée
-    // On cible les éléments internes du widget ElevenLabs
     const style = document.createElement('style');
     style.innerHTML = `
       elevenlabs-convai {
@@ -37,18 +38,12 @@ export default function App() {
         right: 30px;
         z-index: 10000;
       }
-      /* Personnalisation du bouton d'activation */
       elevenlabs-convai::part(button) {
         background: rgba(212, 175, 55, 0.15) !important;
         border: 1px solid rgba(212, 175, 55, 0.3) !important;
         backdrop-filter: blur(10px) !important;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
         transition: all 0.4s ease !important;
-      }
-      elevenlabs-convai::part(button):hover {
-        background: rgba(212, 175, 55, 0.25) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 12px 40px rgba(212, 175, 55, 0.2) !important;
       }
     `;
 
@@ -72,9 +67,9 @@ export default function App() {
       position: 'relative',
       overflow: 'hidden',
     }}>
-      {/* SECTION GAUCHE : INTERFACE CHAT ET SPIRITUALITÉ */}
+      {/* SECTION GAUCHE : INTERFACE CHAT */}
       <div style={{
-        flex: '1.4', // Agrandissement de la zone de chat
+        flex: '1.4',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -83,12 +78,9 @@ export default function App() {
         borderRight: '1px solid rgba(255, 255, 255, 0.05)',
         boxShadow: '10px 0 50px rgba(0,0,0,0.8)',
       }}>
-        <Header
-          intimacyLevel={intimacyLevel}
-          isMirrorMode={isMirrorMode}
-        />
+        <Header intimacyLevel={intimacyLevel} isMirrorMode={isMirrorMode} />
 
-        {/* Effet d'onde visuelle (remplace l'orbe) */}
+        {/* Effet d'onde visuelle */}
         <div style={{
           height: '100px',
           display: 'flex',
@@ -98,12 +90,8 @@ export default function App() {
           position: 'relative'
         }}>
           <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.6, 0.3],
-              borderRadius: ["40%", "50%", "40%"]
-            }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity }}
             style={{
               width: '150px',
               height: '2px',
@@ -114,18 +102,10 @@ export default function App() {
           />
         </div>
 
-        {/* Zone de conversation agrandie */}
-        <div style={{
-          flex: 1,
-          overflow: 'hidden',
-          padding: '0 60px', // Plus d'espace sur les côtés
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
+        <div style={{ flex: 1, overflow: 'hidden', padding: '0 60px', display: 'flex', flexDirection: 'column' }}>
           <ChatInterface messages={messages} isLoading={isLoading} />
         </div>
 
-        {/* Barre de saisie */}
         <div style={{ padding: '20px 60px 40px' }}>
           <InputBar
             onSend={sendMessage}
@@ -136,25 +116,16 @@ export default function App() {
         </div>
       </div>
 
-      {/* SECTION DROITE : PRÉSENCE PHYSIQUE (PORTRAIT) */}
+      {/* SECTION DROITE : PORTRAIT (Caché sur mobile pour la LP) */}
       <div style={{
         flex: '1',
         height: '100%',
         position: 'relative',
         overflow: 'hidden',
         background: '#000',
+        display: 'block' // On peut ajouter des media queries ici
       }}>
-        {/* L'image d'Aura */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2.5 }}
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          }}
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 2.5 }} style={{ width: '100%', height: '100%' }}>
           <img
             src="/aura-portrait.png"
             alt="Aura"
@@ -162,36 +133,42 @@ export default function App() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: 'center 15%',
-              filter: 'contrast(1.05) brightness(0.95)',
+              objectPosition: 'center 15%'
             }}
           />
-
-          {/* Superposition de gradients */}
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: `
-              linear-gradient(to right, #050505 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%),
-              linear-gradient(to top, #050505 0%, transparent 25%),
-              linear-gradient(to bottom, #050505 0%, transparent 15%)
-            `,
-            pointerEvents: 'none',
-          }} />
-
-          {/* Halo chaleureux subtil derrière elle */}
-          <div style={{
-            position: 'absolute',
-            top: '30%',
-            left: '30%',
-            width: '400px',
-            height: '400px',
-            background: 'radial-gradient(circle, rgba(212, 175, 55, 0.04) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            pointerEvents: 'none',
+            background: 'linear-gradient(to right, #050505 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%)'
           }} />
         </motion.div>
       </div>
     </div>
+  );
+}
+
+// Wrapper avec Routage et Protection
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // Vérifier si l'utilisateur est déjà "connecté" via localStorage
+    return localStorage.getItem('aura_access') === 'true';
+  });
+
+  const handleAccess = () => {
+    localStorage.setItem('aura_access', 'true');
+    setIsAuthenticated(true);
+  };
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={
+          isAuthenticated ? <Navigate to="/app" /> : <LandingPage onEnter={handleAccess} />
+        } />
+        <Route path="/app" element={
+          isAuthenticated ? <AuraApp /> : <Navigate to="/" />
+        } />
+      </Routes>
+    </Router>
   );
 }
