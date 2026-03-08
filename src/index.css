@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --aura-gold: #D4AF37;
+  --aura-gold-bright: #F5E5B8;
+  --bg-deep: #050505;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-deep);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar ultra-fine et discrète */
+::-webkit-scrollbar {
+  width: 2px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.1);
+  border-radius: 10px;
+}
+
+/* Typography Luxe */
+h1,
+h2,
+.playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Animations de transition */
+* {
+  transition: background-color 0.4s ease, border-color 0.4s ease, opacity 0.4s ease;
+}
+
+/* Classes utilitaires pour le glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-gold {
+  background: rgba(212, 175, 55, 0.05);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+}
