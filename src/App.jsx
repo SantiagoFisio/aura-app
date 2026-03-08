@@ -46,7 +46,7 @@ export default function App() {
     }}>
       {/* SECTION GAUCHE : INTERFACE CHAT ET SPIRITUALITÉ */}
       <div style={{
-        flex: '1.3',
+        flex: '1.4', // Agrandissement de la zone de chat
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -60,23 +60,37 @@ export default function App() {
           isMirrorMode={isMirrorMode}
         />
 
-        {/* Orbe Flottant */}
+        {/* Effet d'onde visuelle (remplace l'orbe) */}
         <div style={{
-          height: '200px',
+          height: '100px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          transform: 'scale(0.8)',
-          margin: '10px 0',
+          margin: '20px 0',
+          position: 'relative'
         }}>
-          <AuraOrb isThinking={isLoading} isTyping={false} />
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.6, 0.3],
+              borderRadius: ["40%", "50%", "40%"]
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              width: '150px',
+              height: '2px',
+              background: 'linear-gradient(90deg, transparent, var(--aura-gold), transparent)',
+              filter: 'blur(4px)',
+              boxShadow: '0 0 20px var(--aura-gold)'
+            }}
+          />
         </div>
 
-        {/* Zone de conversation */}
+        {/* Zone de conversation agrandie */}
         <div style={{
           flex: 1,
           overflow: 'hidden',
-          padding: '0 40px',
+          padding: '0 60px', // Plus d'espace sur les côtés
           display: 'flex',
           flexDirection: 'column',
         }}>
@@ -84,7 +98,7 @@ export default function App() {
         </div>
 
         {/* Barre de saisie */}
-        <div style={{ padding: '20px 40px 30px' }}>
+        <div style={{ padding: '20px 60px 40px' }}>
           <InputBar
             onSend={sendMessage}
             isLoading={isLoading}

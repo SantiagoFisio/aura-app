@@ -31,48 +31,17 @@ export default function MessageBubble({ message, onSpeak }) {
                 >
                     <p style={{
                         margin: 0,
-                        fontFamily: isAura ? 'Playfair Display, serif' : 'Inter, sans-serif',
-                        fontSize: isAura ? '17px' : '15px',
-                        lineHeight: '1.6',
-                        fontWeight: isAura ? '400' : '400',
-                        fontStyle: isAura ? 'italic' : 'normal',
+                        fontFamily: 'Inter, sans-serif', // Plus lisible que Playfair pour le texte long
+                        fontSize: isAura ? '18px' : '16px', // Plus grand
+                        lineHeight: '1.7',
+                        fontWeight: '300', // Plus léger et élégant
                         color: isAura ? '#F5E5B8' : '#ffffff',
-                        letterSpacing: '0.01em',
+                        letterSpacing: '0.015em',
                     }}>
                         {message.content}
                     </p>
                 </div>
 
-                {isAura && onSpeak && (
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        marginTop: '8px',
-                    }}>
-                        <button
-                            onClick={() => onSpeak(message.content)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: 'rgba(212, 175, 55, 0.5)',
-                                fontSize: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '0 4px',
-                                fontFamily: 'Inter, sans-serif',
-                                letterSpacing: '0.1em',
-                                textTransform: 'uppercase',
-                            }}
-                            onMouseEnter={e => e.target.style.color = 'rgba(212, 175, 55, 1)'}
-                            onMouseLeave={e => e.target.style.color = 'rgba(212, 175, 55, 0.5)'}
-                        >
-                            <span>Écouter</span>
-                            <span>▶</span>
-                        </button>
-                    </div>
-                )}
             </div>
         </motion.div>
     );
