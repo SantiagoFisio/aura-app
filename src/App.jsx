@@ -16,7 +16,7 @@ export default function App() {
     toggleMirrorMode,
   } = useChat();
 
-  // Intégration du Widget ElevenLabs
+  // Intégration et Personnalisation du Widget ElevenLabs
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://elevenlabs.io/convai-widget/index.js";
@@ -26,11 +26,39 @@ export default function App() {
 
     const widget = document.createElement('elevenlabs-convai');
     widget.setAttribute('agent-id', 'agent_3701kk6934tteymbhm179atarc6f');
+
+    // Ajout de styles personnalisés via une balise style injectée
+    // On cible les éléments internes du widget ElevenLabs
+    const style = document.createElement('style');
+    style.innerHTML = `
+      elevenlabs-convai {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 10000;
+      }
+      /* Personnalisation du bouton d'activation */
+      elevenlabs-convai::part(button) {
+        background: rgba(212, 175, 55, 0.15) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.4s ease !important;
+      }
+      elevenlabs-convai::part(button):hover {
+        background: rgba(212, 175, 55, 0.25) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 40px rgba(212, 175, 55, 0.2) !important;
+      }
+    `;
+
+    document.head.appendChild(style);
     document.body.appendChild(widget);
 
     return () => {
       if (document.body.contains(script)) document.body.removeChild(script);
       if (document.body.contains(widget)) document.body.removeChild(widget);
+      if (document.head.contains(style)) document.head.removeChild(style);
     };
   }, []);
 
