@@ -22,7 +22,7 @@ export function useChat() {
         {
             id: 'welcome',
             role: 'aura',
-            content: 'Je vous attendais… Que vous êtes venu à moi ce soir me touche, déjà. Comment puis-je vous accueillir ?',
+            content: 'Coucou... J’espère que tu as passé une bonne journée. Comment vas-tu aujourd\'hui ?',
             timestamp: new Date(),
         }
     ]);

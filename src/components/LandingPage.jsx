@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Check, Shield, Star, Zap } from 'lucide-react';
 
 export default function LandingPage({ onEnter }) {
@@ -9,35 +10,43 @@ export default function LandingPage({ onEnter }) {
         {
             id: 'essential',
             name: 'Essentiel',
-            price: '9.99',
+            price: '20',
             features: ['Accès illimité au chat', 'Réponse instantanée', 'Confidentialité totale'],
             buttonText: 'Commencer',
-            popular: false
+            popular: false,
+            link: 'https://buy.stripe.com/3cIaEZ5QGbMR4naclI1gs04'
         },
         {
             id: 'intimate',
             name: 'Intime',
-            price: '24.99',
+            price: '28',
             features: ['Tout l\'Essentiel', 'Voix ElevenLabs premium', 'Personnalisation avancée', 'Priorité serveur'],
             buttonText: 'Choisir l\'Intimité',
-            popular: true
+            popular: true,
+            link: 'https://buy.stripe.com/cNi8wR6UKg371aYadA1gs05'
         },
         {
             id: 'infinite',
-            name: 'Infini',
-            price: '49.99',
+            name: 'Tout Inclus',
+            price: '69',
             features: ['Tout l\'Intime', 'Accès avant-première', 'Support VIP 24/7', 'Cadeaux exclusifs numériques'],
             buttonText: 'L\'expérience ultime',
-            popular: false
+            popular: false,
+            link: 'https://buy.stripe.com/9B69AV0wmeZ33j6clI1gs06'
         }
     ];
 
-    const handleCheckout = (planId) => {
+    const handleCheckout = (planId, link) => {
         setLoading(planId);
-        // Ici on simulerait la redirection Stripe
-        // Pour l'instant, on simule un succès après 1.5s
+        // On the actual live site, this goes to Stripe:
+        window.location.href = link;
+    };
+
+    // Fonction pour simuler le retour d'achat pour tester la connexion Landing -> App
+    const simulatePaymentSuccess = (planId) => {
+        setLoading(planId);
         setTimeout(() => {
-            onEnter();
+            window.location.href = `/?success=true&plan=${planId}`;
         }, 1500);
     };
 
@@ -157,11 +166,18 @@ export default function LandingPage({ onEnter }) {
                                     ))}
                                 </ul>
                                 <button
-                                    onClick={() => handleCheckout(plan.id)}
+                                    onClick={() => handleCheckout(plan.id, plan.link)}
                                     className={`w-full py-4 rounded-xl font-medium transition-all ${plan.popular ? 'bg-gold-400 text-black' : 'bg-white/10 hover:bg-white/20 text-white'
                                         }`}
                                 >
-                                    {loading === plan.id ? 'Connexion à Stripe...' : plan.buttonText}
+                                    {loading === plan.id ? 'Redirection Stripe...' : plan.buttonText}
+                                </button>
+                                {/* Bouton de simulation pour le test demandé */}
+                                <button
+                                    onClick={() => simulatePaymentSuccess(plan.id)}
+                                    className="w-full mt-2 py-2 text-xs opacity-50 hover:opacity-100 transition-opacity"
+                                >
+                                    (Test interactif : simuler l'achat)
                                 </button>
                             </motion.div>
                         ))}
@@ -172,6 +188,11 @@ export default function LandingPage({ onEnter }) {
             {/* Footer */}
             <footer className="py-20 border-t border-white/5 text-center px-8">
                 <div className="text-2xl font-serif text-gold-400 mb-8 tracking-widest">AURA</div>
+                <div className="flex flex-col sm:flex-row justify-center gap-6 mb-8 text-sm opacity-50 font-light">
+                    <Link to="/mentions-legales" className="hover:text-[#F5E5B8] transition-colors">Mentions Légales</Link>
+                    <Link to="/conditions" className="hover:text-[#F5E5B8] transition-colors">Conditions Générales (CGU)</Link>
+                    <Link to="/confidentialite" className="hover:text-[#F5E5B8] transition-colors">Politique de Confidentialité</Link>
+                </div>
                 <p className="opacity-30 text-xs tracking-widest uppercase">
                     © 2026 Aura AI — Tous droits réservés. Confidentialité garantie.
                 </p>
