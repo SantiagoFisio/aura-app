@@ -4,13 +4,14 @@ import Stripe from "stripe";
 
 // Configuration minimale du webhook Stripe
 // Assurez-vous de définir STRIPE_SECRET_KEY et STRIPE_WEBHOOK_SECRET dans votre .env
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-12-18", // Utilisez la version courante
+const stripe = new Stripe((process.env.STRIPE_SECRET_KEY as string) || "dummy_key_for_build", {
+  apiVersion: "2024-12-18.acacia" as any, // Bypass TS version check
 });
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get("Stripe-Signature") as string;
+  const headersList = await headers();
+  const signature = headersList.get("Stripe-Signature") as string;
   let event: Stripe.Event;
 
   try {
