@@ -1,12 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function InputBar({ onSend, isLoading, isMirrorMode, onToggleMirror }) {
+export default function InputBar({ onSend, onSendAudio, isLoading }) {
     const [value, setValue] = useState('');
     const textareaRef = useRef(null);
+    const [isRecording, setIsRecording] = useState(false);
+    const [currentMode, setCurrentMode] = useState(null); // 'voice' or 'voice_to_text'
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
 
     const handleSend = () => {
-        if (value.trim() && !isLoading) {
+        if (value.trim() && !isLoading && !isRecording) {
             onSend(value.trim());
             setValue('');
             if (textareaRef.current) {
@@ -29,109 +33,119 @@ export default function InputBar({ onSend, isLoading, isMirrorMode, onToggleMirr
         }
     }, [value]);
 
+    const startRecording = async (mode) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorderRef.current = new MediaRecorder(stream);
+            audioChunksRef.current = [];
+            setCurrentMode(mode);
+
+            mediaRecorderRef.current.addEventListener('dataavailable', event => {
+                if (event.data.size > 0) {
+                     audioChunksRef.current.push(event.data);
+                }
+            });
+
+            mediaRecorderRef.current.addEventListener('stop', () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                if (onSendAudio) {
+                    onSendAudio(mode, audioBlob);
+                }
+            });
+
+            mediaRecorderRef.current.start();
+            setIsRecording(true);
+            
+        } catch (err) {
+            console.error("Microphone access denied", err);
+            alert("L'accès au microphone est requis.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        }
+        setIsRecording(false);
+        setCurrentMode(null);
+    };
+
+    const toggleRecording = (mode) => {
+        if (!isRecording) {
+            startRecording(mode);
+        } else {
+            // Always stop if already recording
+            stopRecording();
+        }
+    };
+
     return (
-        <div style={{
-            padding: '8px 16px 24px',
-            position: 'relative',
-            zIndex: 10,
-            background: 'transparent'
-        }}>
-            <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                gap: '12px',
-                padding: '8px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                borderRadius: '30px',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
-            }}>
-                {/* Toggle Mode Button (Le bouton multi-color de gauche) */}
+        <div className="footer">
+            <div className="voice-controls">
                 <button
-                    onClick={onToggleMirror}
-                    title={isMirrorMode ? "Mode Écoute Pure Actif (Désactiver)" : "Activer Mode Miroir"}
-                    style={{
-                        minWidth: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        background: isMirrorMode
-                            ? 'conic-gradient(from 0deg, #D4AF37, #ff6b6b, #4a00e0, #D4AF37)'
-                            : 'rgba(255,255,255,0.1)',
-                        border: 'none',
-                        color: '#fff',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        transition: 'transform 0.2s',
-                    }}
-                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.9)'}
-                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                    id="call-btn"
+                    className={`call-fab ${isRecording && currentMode === 'voice' ? 'recording' : ''}`}
+                    onClick={() => toggleRecording('voice')}
+                    disabled={isLoading || (isRecording && currentMode !== 'voice')}
                 >
-                    <span style={{ fontSize: '18px' }}>✧</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2A3 3 0 0 0 9 5v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" y1="19" x2="12" y2="23" />
+                        <line x1="8" y1="23" x2="16" y2="23" />
+                    </svg>
+                    <span id="call-text">
+                        {isRecording && currentMode === 'voice' ? "Cliquer pour raccrocher" : "Appeler (Voix à Voix)"}
+                    </span>
                 </button>
+            </div>
 
-                {/* Input Textarea */}
-                <div style={{
-                    flex: 1,
-                    padding: '8px 4px',
-                }}>
-                    <textarea
-                        ref={textareaRef}
-                        id="chat-input"
-                        value={value}
-                        onChange={e => setValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={isMirrorMode ? "Je vous écoute..." : "Demandez ce que vous voulez..."}
-                        rows={1}
-                        style={{
-                            width: '100%',
-                            background: 'none',
-                            border: 'none',
-                            outline: 'none',
-                            color: 'rgba(255,255,255,0.9)',
-                            fontFamily: 'Inter, sans-serif',
-                            fontSize: '15px',
-                            lineHeight: '1.4',
-                            resize: 'none',
-                        }}
-                    />
+            <div className="input-pill">
+                <span className="input-icon">✦</span>
+                <textarea
+                    ref={textareaRef}
+                    id="message-input"
+                    value={value}
+                    onChange={e => setValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={
+                        isRecording && currentMode === 'voice_to_text' 
+                            ? "Dictée en cours..." 
+                            : "Demandez ce que vous voulez..."
+                    }
+                    disabled={isLoading || isRecording}
+                    rows={1}
+                />
+                
+                <div className="pill-actions">
+                    <button
+                        id="transcribe-btn"
+                        className={`icon-action ${isRecording && currentMode === 'voice_to_text' ? 'recording' : ''}`}
+                        onClick={() => toggleRecording('voice_to_text')}
+                        disabled={isLoading || (isRecording && currentMode !== 'voice_to_text')}
+                        title="Dicter (Audio to Text)"
+                    >
+                        {isRecording && currentMode === 'voice_to_text' ? (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        ) : (
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2A3 3 0 0 0 9 5v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        )}
+                    </button>
+                    
+                    <button
+                        id="send-btn"
+                        className="icon-action send-action"
+                        onClick={handleSend}
+                        disabled={!value.trim() || isLoading || isRecording}
+                    >
+                        {isLoading ? (
+                            <motion.span animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}>⟳</motion.span>
+                        ) : (
+                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                        )}
+                    </button>
                 </div>
-
-                {/* Send Button / Loading Orb */}
-                <button
-                    onClick={handleSend}
-                    disabled={!value.trim() || isLoading}
-                    style={{
-                        minWidth: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        background: value.trim() && !isLoading ? 'rgba(255,255,255,0.2)' : 'transparent',
-                        border: 'none',
-                        color: value.trim() && !isLoading ? '#fff' : 'rgba(255,255,255,0.3)',
-                        cursor: value.trim() && !isLoading ? 'pointer' : 'default',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        transition: 'background 0.3s, color 0.3s',
-                    }}
-                >
-                    {isLoading ? (
-                        <motion.span
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                        >
-                            ⟳
-                        </motion.span>
-                    ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="19" x2="12" y2="5"></line>
-                            <polyline points="5 12 12 5 19 12"></polyline>
-                        </svg>
-                    )}
-                </button>
             </div>
         </div>
     );

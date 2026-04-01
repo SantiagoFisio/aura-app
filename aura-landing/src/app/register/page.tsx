@@ -2,14 +2,25 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Register() {
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    // Récupérer le paramètre d'erreur dans l'URL (ex: ?error=Mot de passe invalide)
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+       setErrorMessage(error);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     const formData = new FormData(e.currentTarget);
     
     // Le signIn NextAuth s'occupera d'appeler l'inscription automatique 
@@ -37,6 +48,12 @@ export default function Register() {
           </p>
         </div>
         
+        {errorMessage && (
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+            {errorMessage === "CredentialsSignin" ? "Identifiants invalides." : errorMessage}
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>

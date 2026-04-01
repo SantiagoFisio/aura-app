@@ -65,3 +65,74 @@ h2,
   backdrop-filter: blur(15px);
   border: 1px solid rgba(212, 175, 55, 0.1);
 }
+
+/* --- CUSTOM CHATBOT STYLES --- */
+:root {
+    --text-muted: #86868b;
+    --input-bg: rgba(20, 20, 20, 0.8);
+    --ai-msg: rgba(10, 10, 10, 0.6);
+    --accent: #d4af37;
+    --danger: #ff453a;
+}
+.audio-player-container { margin-top: 12px; }
+audio {
+    width: 250px; height: 32px; border-radius: 16px; outline: none;
+}
+audio::-webkit-media-controls-panel {
+    background: var(--input-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: #fff;
+}
+.call-fab {
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    color: var(--accent);
+    border-radius: 30px;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+.call-fab:hover { background: rgba(212, 175, 55, 0.08); }
+.call-fab.recording {
+    background: rgba(255, 69, 58, 0.1);
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 69, 58, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
+}
+.input-pill {
+    display: flex; background: var(--input-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px; padding: 6px 16px;
+    align-items: center; gap: 12px; flex: 1;
+}
+.icon-action {
+    background: transparent; border: none; color: var(--text-muted);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s; width: 24px; height: 24px;
+}
+.icon-action:hover { color: #fff; }
+.icon-action.recording { color: var(--danger); animation: pulse 1.5s infinite; }
+#warning-banner {
+    position: absolute; top: 0; left: 0; right: 0;
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--accent);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 8px 24px; font-size: 13px; text-align: center;
+    z-index: 50; transition: all 0.3s ease;
+}
+#warning-banner.hidden { display: none; }

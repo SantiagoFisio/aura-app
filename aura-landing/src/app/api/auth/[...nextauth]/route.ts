@@ -69,18 +69,6 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
-  cookies: {
-    // Forçage de la sécurité stricte sur les cookies (HttpOnly, SameSite) - Pas de LocalStorage
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: true
-      }
-    }
-  },
   pages: {
     signIn: "/register", // Redirige les erreurs vers la page de login customisée
   },
